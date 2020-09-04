@@ -84,7 +84,7 @@ class MovieSection {
         </div>
         <div class="col-md-8">
           <h2 id="movie-title">${movie.title}</h2>
-          <p id="genres">${movie.genre_ids}</p>
+          <p id="genres">${movie.genre}</p>
           <p id="language">${movie.original_language}</p>
           <p id="movie-release-date">${movie.releaseDate}</p>
           <p id="movie-runtime">${movie.runtime}</p>
