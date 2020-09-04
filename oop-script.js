@@ -146,4 +146,7 @@ class Movie {
     }
 }
 
+
+
+//comment test 
 document.addEventListener("DOMContentLoaded", App.run);
