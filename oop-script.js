@@ -34,8 +34,16 @@ class APIService {
         //console.log(data);
         return data.cast.slice(0,5).map(actor => new Actor(actor))
     }
-}
 
+//     static async fetchActors(movie_id) {
+//         const url = APIService._constructUrl(`movie/${movie_id}/similar`)
+//         const response = await fetch(url)
+//         const data = await response.json()
+//        console.log(data);
+//         return data.results.map(similarMovie => new Movies(similarMovie))
+// }
+
+}
 class HomePage {
     static container = document.getElementById('container');
     static renderMovies(movies) {
@@ -84,7 +92,11 @@ class MovieSection {
         </div>
         <div class="col-md-8">
           <h2 id="movie-title">${movie.title}</h2>
+<<<<<<< HEAD
           <p id="genres">${movie.genre}</p>
+=======
+          <p id="genres">${movie.genres.map(genre => genre.name)}</p>
+>>>>>>> undefined solved
           <p id="language">${movie.original_language}</p>
           <p id="movie-release-date">${movie.releaseDate}</p>
           <p id="movie-runtime">${movie.runtime}</p>
@@ -99,8 +111,10 @@ class MovieSection {
         <p> ${actor.name}</p>
         `   
         )}
+    
         </div>
     `;
+    //console.log(movie);
     }
 }
 
@@ -129,7 +143,7 @@ class Actor {
 class Movie {
     static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
     constructor(json) {
-        console.log(json);
+        //console.log(json);
         this.id = json.id;
         this.title = json.title;
         this.releaseDate = json.release_date;
@@ -137,13 +151,15 @@ class Movie {
         this.overview = json.overview;
         this.backdropPath = json.backdrop_path;
         this.original_language = json.original_language;
-        this.genre_ids = json.genre_ids;
+        this.genres = json.genres;
         //this.original_language = original_language;
     }
 
     get backdropUrl() {
         return this.backdropPath ? Movie.BACKDROP_BASE_URL + this.backdropPath : "";
     }
+
+
 }
 
 
