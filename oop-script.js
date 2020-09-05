@@ -3,7 +3,10 @@
 class App {
     static async run() {
         const movies = await APIService.fetchMovies()
+        const genreList = await APIService.fetchDropdowngenres()
+        console.log(genreList);
         HomePage.renderMovies(movies);
+        GenresMovies.renderGeners(genreList);
     }
 }
 
@@ -13,7 +16,7 @@ class APIService {
         const url = APIService._constructUrl(`movie/now_playing`)
         const response = await fetch(url)
         const data = await response.json()
-        //console.log(data)
+        console.log(data)
         return data.results.map(movie => new Movie(movie))
     }
     static async fetchMovie(movieId) {
@@ -34,14 +37,21 @@ class APIService {
         //console.log(data);
         return data.cast.slice(0,5).map(actor => new Actor(actor))
     }
+    static async fetchSimilarMovies(movie_id){
+        const url = APIService._constructUrl(`movie/${movie_id}/similar`)
+        const response = await fetch(url)
+        const data = await response.json()
+        //console.log(data);
+        return data.results.slice(0,5).map(similarMovie => new Movie(similarMovie))
+    }
+    static async fetchDropdowngenres(){
+        const url = APIService._constructUrl(`genre/movie/list`)
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data);
+        return data.genres
+    }
 
-//     static async fetchActors(movie_id) {
-//         const url = APIService._constructUrl(`movie/${movie_id}/similar`)
-//         const response = await fetch(url)
-//         const data = await response.json()
-//        console.log(data);
-//         return data.results.map(similarMovie => new Movies(similarMovie))
-// }
 
 }
 class HomePage {
@@ -57,6 +67,7 @@ class HomePage {
                 Movies.run(movie);
             });
 
+            
             movieDiv.appendChild(movieTitle);
             movieDiv.appendChild(movieImage);
             this.container.appendChild(movieDiv);
@@ -64,6 +75,11 @@ class HomePage {
     }
 }
 
+// class ActorSection {
+//     static renderActor(actors){
+//         MoviePage.container.innerHTML = ``  
+//     }
+// }
 
 class Movies {
     static async run(movie) {
@@ -71,20 +87,24 @@ class Movies {
         //console.log(movieData)
         const actors = await APIService.fetchActors(movie.id)
         //console.log(actors);
-        MoviePage.renderMovieSection(movieData,actors);
+        const similar = await APIService.fetchSimilarMovies(movie.id)
+        console.log(similar);
+        // const genresMovies = await APIService.fetchDropdowngenres(movie)
+        // console.log(genresMovies);
         
+        MoviePage.renderMovieSection(movieData,actors, similar);
     }
 }
 
 class MoviePage {
     static container = document.getElementById('container');
-    static renderMovieSection(movie, actors) {
-        MovieSection.renderMovie(movie,actors);
+    static renderMovieSection(movie, actors, similar) {
+        MovieSection.renderMovie(movie,actors, similar);
     }
 }
 
 class MovieSection {
-    static renderMovie(movie, actors) {
+    static renderMovie(movie, actors, similar) {
         MoviePage.container.innerHTML = `
       <div class="row">
         <div class="col-md-4">
@@ -98,6 +118,12 @@ class MovieSection {
           <p id="movie-runtime">${movie.runtime}</p>
           <h3>Overview:</h3>
           <p id="movie-overview">${movie.overview}</p>
+        </div>
+        <div>
+        ${similar.map(simiMovie => `
+        <p>${simiMovie.title}</p>
+        `
+        ).join("")}
         </div>
       </div>
       <h3>Actors:</h3>
@@ -114,11 +140,16 @@ class MovieSection {
     }
 }
 
-// class ActorSection {
-//     static renderActor(actors){
-//         MoviePage.container.innerHTML = ``  
-//     }
-// }
+class GenresMovies {
+  static renderGeners(genres){
+      const genresNames = document.getElementById('dropdown-genres')
+      genresNames.innerHTML = genres.map(genre => {
+        return  `<a class="dropdown-item" href="#">${genre.name}</a>`
+      }).join("");
+  }
+}
+
+
 class Actor {
     //static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
     constructor(json) {
@@ -147,6 +178,8 @@ class Movie {
         this.overview = json.overview;
         this.backdropPath = json.backdrop_path;
         this.original_language = json.original_language;
+        this.genre_ids = json.genre_ids;
+        //console.log(this.genre_ids);
         this.genres = json.genres;
         //this.original_language = original_language;
     }
@@ -157,8 +190,5 @@ class Movie {
 
 
 }
-
-
-
 //comment test 
 document.addEventListener("DOMContentLoaded", App.run);
