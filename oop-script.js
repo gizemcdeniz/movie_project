@@ -4,7 +4,7 @@ class App {
     static async run() {
         const movies = await APIService.fetchMovies()
         const genreList = await APIService.fetchDropdowngenres()
-        console.log(genreList);
+        //console.log(genreList);
         HomePage.renderMovies(movies);
         GenresMovies.renderGeners(genreList);
     }
@@ -16,7 +16,7 @@ class APIService {
         const url = APIService._constructUrl(`movie/now_playing`)
         const response = await fetch(url)
         const data = await response.json()
-        console.log(data)
+        //console.log(data)
         return data.results.map(movie => new Movie(movie))
     }
     static async fetchMovie(movieId) {
@@ -34,8 +34,18 @@ class APIService {
         const url = APIService._constructUrl(`movie/${movie_id}/credits`)
         const response = await fetch(url)
         const data = await response.json()
-        //console.log(data);
+        console.log(data);
         return data.cast.slice(0,5).map(actor => new Actor(actor))
+    }
+    static async fetchDirector(movie_id) {
+        const url = APIService._constructUrl(`movie/${movie_id}/credits`)
+        const response = await fetch(url)
+        const data = await response.json()
+        //console.log(data);
+        //.map(({ foo }) => foo)
+        return data.crew.map(({job}) => job)
+        //filter((job) => job.dierctor !== job.dierctor)
+        
     }
     static async fetchSimilarMovies(movie_id){
         const url = APIService._constructUrl(`movie/${movie_id}/similar`)
@@ -48,7 +58,7 @@ class APIService {
         const url = APIService._constructUrl(`genre/movie/list`)
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data);
+        //console.log(data);
         return data.genres
     }
 
@@ -88,23 +98,25 @@ class Movies {
         const actors = await APIService.fetchActors(movie.id)
         //console.log(actors);
         const similar = await APIService.fetchSimilarMovies(movie.id)
-        console.log(similar);
+        //console.log(similar);
+        const directorName = await APIService.fetchDirector(movie.id)
+        console.log(directorName);
         // const genresMovies = await APIService.fetchDropdowngenres(movie)
         // console.log(genresMovies);
         
-        MoviePage.renderMovieSection(movieData,actors, similar);
+        MoviePage.renderMovieSection(movieData,actors, similar, directorName);
     }
 }
 
 class MoviePage {
     static container = document.getElementById('container');
-    static renderMovieSection(movie, actors, similar) {
-        MovieSection.renderMovie(movie,actors, similar);
+    static renderMovieSection(movie, actors, similar, directorName) {
+        MovieSection.renderMovie(movie,actors, similar, directorName);
     }
 }
 
 class MovieSection {
-    static renderMovie(movie, actors, similar) {
+    static renderMovie(movie, actors, similar, directorName) {
         MoviePage.container.innerHTML = `
       <div class="row">
         <div class="col-md-4">
@@ -118,6 +130,10 @@ class MovieSection {
           <p id="movie-runtime">${movie.runtime}</p>
           <h3>Overview:</h3>
           <p id="movie-overview">${movie.overview}</p>
+          <h4>Dirctor Name</h4>
+          <p id="directorName">${directorName.name}</p>
+          <h5>Production Companies</h5>
+          <p id="prductionNames">${movie.production_companies.map(production_company => production_company.name)}</P>
         </div>
         <div>
         ${similar.map(simiMovie => `
@@ -157,6 +173,7 @@ class Actor {
         this.name = json.name;
         this.gender=json.gender
         this.profile_path = json.profile_path;
+        this.job = json.job
         // this.title = json.title;
         // this.releaseDate = json.release_date;
         // this.runtime = json.runtime + " minutes";
@@ -179,6 +196,8 @@ class Movie {
         this.backdropPath = json.backdrop_path;
         this.original_language = json.original_language;
         this.genre_ids = json.genre_ids;
+        this.production_companies = json.production_companies;
+        //console.log(production_companies);
         //console.log(this.genre_ids);
         this.genres = json.genres;
         //this.original_language = original_language;
