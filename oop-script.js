@@ -74,8 +74,16 @@ class APIService {
         const url = APIService._constructUrl(`person/${person_id}`);
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data)
+       // console.log(data)
         return new Actor(data)
+    }
+
+    static async fetchVideos(movie_id) {
+        const url = APIService._constructUrl(`movie/${movie_id}/videos`);
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data.results[0].key)
+        return new Video(data.results[0].key)
     }
 }
 // static renderGeners(genres){
@@ -119,23 +127,45 @@ class Movies {
         //console.log(similar);
         const directorName = await APIService.fetchDirector(movie.id)
         //console.log(directorName);
+        const videos = await APIService.fetchVideos(movie.id);
 
-        MoviePage.renderMovieSection(movieData, actorsInEachMovie, similar, directorName);
+        MoviePage.renderMovieSection(movieData, actorsInEachMovie, similar, directorName, videos);
     }
 }
 
 
 class MoviePage {
     static container = document.getElementById('container');
-    static renderMovieSection(movie, actorsInMovie, similar, directorName) {
-        MovieSection.renderMovie(movie, actorsInMovie, similar, directorName);
+
+static renderMovieSection(movie, actorsInMovie, similar, directorName, videos) {
+    MovieSection.renderMovie(movie, actorsInMovie, similar, directorName, videos);
+    }
+}
+class ActorSection {
+    static renderActor(actor) {
+        ActorsPage.actorContainer.innerHTML = `
+      <div class="row">
+        <div class="col-md-4">
+          <img id="actor-backdrop" src=${actor.backdropUrlActors}> 
+        </div>
+        <div class="col-md-8">
+          <h2 id="actor-name">${actor.name}</h2>
+          <p id="actor-gender">${actor.gender}</p>
+           <p id="actor-birthday">${actor.birthday}</p>
+          
+          <p id="actor-popularity">${actor.popularity}</p>
+          <h3>Biography:</h3>
+          <p id="actor-biography">${actor.biography}</p>
+        </div>
+      </div>
+    `;
     }
 }
 
 
 
 class MovieSection {
-    static renderMovie(movie, actors, similar, directorName) {
+    static renderMovie(movie, actors, similar, directorName, videos) {
         MoviePage.container.innerHTML = `
       <div class="row">
         <div class="col-md-4">
@@ -162,6 +192,8 @@ class MovieSection {
         </div>
       </div>
       <h3>Actors:</h3>
+      <h4>Videos</h4>
+      <iframe width="560" height="315" src="https://youtube.com/embed/${videos.key}" allowfullscreen></iframe>
         <div>
         ${actors.map(actor => `
         <img src=${actor.backdropUrl} width = 20% >
@@ -240,28 +272,21 @@ class ActorPage {
     }
 }
 
-class ActorSection {
-    static renderActor(actor) {
-        ActorsPage.actorContainer.innerHTML = `
-      <div class="row">
-        <div class="col-md-4">
-          <img id="actor-backdrop" src=${actor.backdropUrlActors}> 
-        </div>
-        <div class="col-md-8">
-          <h2 id="actor-name">${actor.name}</h2>
-          <p id="actor-gender">${actor.gender}</p>
-           <p id="actor-birthday">${actor.birthday}</p>
-          <p id="actor-popularity">${actor.popularity}</p>
-          <h3>Biography:</h3>
-          <p id="actor-biography">${actor.biography}</p>
-        </div>
-      </div>
-    `;
+
+
+
+class Video {
+    constructor(json) {
+        this.key = json;
     }
+
+    static async getVideoUrl(movie_id) {
+        const dataVideo = await APIService.fetchVideos(movie_id);
+        console.log(dataVideo);
+        return `${dataVideo}`;
+    }
+
 }
-
-
-
 class Actor {
     static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
     constructor(json) {
