@@ -4,7 +4,7 @@ class App {
     static async run() {
         const movies = await APIService.fetchMovies()
         const genreList = await APIService.fetchDropdowngenres()
-        const actors = await APIService.fetchActors()
+        //const actors = await APIService.fetchActors()
         //console.log(genreList);
         HomePage.renderMovies(movies);
         GenresMovies.renderGeners(genreList);
@@ -67,7 +67,7 @@ class APIService {
         const url = APIService._constructUrl(`person/popular`);
         const response = await fetch(url);
         const data = await response.json();
-        //console.log(data)
+        console.log(data)
         return data.results.map(actor => new Actor(actor));
     }
     static async fetchActor(person_id) {
@@ -84,26 +84,6 @@ class APIService {
 //       return  `<a class="dropdown-item" href="#">${genre.name}</a>`
 //     }).join("");
 // }
-class ActorsPage {
-    static actorContainer = document.getElementById("actorsDataContainer")
-    static renderActors(actors) {
-        console.log(actors);
-        actors.forEach(actor => {
-            const actorDiv = document.createElement("div");
-            const actorImage = document.createElement("img");
-            actorImage.src = `${actor.profile_path}`;
-            const actorName = document.createElement("h3");
-            actorName.textContent = `${actor.name}`;
-            actorImage.addEventListener("click", function () {
-                Actors.runActor(actor);
-            })
-            actorDiv.appendChild(actorName);
-            actorDiv.appendChild(actorImage);
-            this.actorContainer.appendChild(actorDiv);
-        })
-    }
-}
-
 
 class HomePage {
     static container = document.getElementById('container');
@@ -127,17 +107,7 @@ class HomePage {
     }
 }
 
-class Actors {
-    static async run(actor) {
-        const actorData = await APIService.fetchActors();
-        //console.log(actorData);
-        ActorsPage.renderActorSection(actorData);
-    }
-    static async runActor(actor) {
-        const actorData = await APIService.fetchActor(actor.id)
-        ActorSection.renderActor(actorData);
-    }
-}
+
 
 class Movies {
     static async run(movie) {
@@ -153,38 +123,17 @@ class Movies {
         MoviePage.renderMovieSection(movieData, actorsInEachMovie, similar, directorName);
     }
 }
-// class ActorPage {
-//     static actorContainer = document.getElementById("actorsData-container");
-//     static renderActorSection(actor){
-//         ActorSetion.renderActor(actor);
-//     }
-//}
+
+
 class MoviePage {
     static container = document.getElementById('container');
-    static renderMovieSection(movie, actors, similar, directorName) {
-        MovieSection.renderMovie(movie, actors, similar, directorName);
+    static renderMovieSection(movie, actorsInMovie, similar, directorName) {
+        MovieSection.renderMovie(movie, actorsInMovie, similar, directorName);
     }
 }
-class ActorSection {
-    static renderActor(actor) {
-        ActorsPage.actorContainer.innerHTML = `
-      <div class="row">
-        <div class="col-md-4">
-          <img id="actor-backdrop" src=${actor.backdropUrlActors}> 
-        </div>
-        <div class="col-md-8">
-          <h2 id="actor-name">${actor.name}</h2>
-          <p id="actor-gender">${actor.gender}</p>
-           <p id="actor-birthday">${actor.birthday}</p>
-          
-          <p id="actor-popularity">${actor.popularity}</p>
-          <h3>Biography:</h3>
-          <p id="actor-biography">${actor.biography}</p>
-        </div>
-      </div>
-    `;
-    }
-}
+
+
+
 class MovieSection {
     static renderMovie(movie, actors, similar, directorName) {
         MoviePage.container.innerHTML = `
@@ -226,6 +175,114 @@ class MovieSection {
     }
 }
 
+
+class Movie {
+    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
+    constructor(json) {
+        //console.log(json);
+        this.id = json.id;
+        this.title = json.title;
+        this.releaseDate = json.release_date;
+        this.runtime = json.runtime + " minutes";
+        this.overview = json.overview;
+        this.backdropPath = json.backdrop_path;
+        this.original_language = json.original_language;
+        this.genre_ids = json.genre_ids;
+        this.production_companies = json.production_companies;
+        this.genres = json.genres;
+    }
+
+    get backdropUrl() {
+        return this.backdropPath ? Movie.BACKDROP_BASE_URL + this.backdropPath : "";
+    }
+}
+
+
+class ActorsPage {
+    static actorContainer = document.getElementById("actorsDataContainer")
+    static renderActors(actors) {
+        console.log(actors);
+        //const mainDiv = document.createElement("div")
+        actors.forEach(actor => {
+            const actorDiv = document.createElement("div");
+            const actorImage = document.createElement("img");
+            actorImage.src = `${actor.backdropUrlActors}`;
+            const actorName = document.createElement("h3");
+            actorName.textContent = `${actor.name}`;
+            actorImage.addEventListener("click", function () {
+                Actors.runActor(actor);
+            })
+            actorDiv.appendChild(actorName);
+            actorDiv.appendChild(actorImage);
+            //mainDiv.appendChild(actorDiv);
+            ActorsPage.actorContainer.appendChild(actorDiv);
+        })
+    }
+}
+
+
+class Actors {
+    static async run() {
+        const actorData = await APIService.fetchActors();
+        //console.log(actorData);
+        ActorsPage.renderActors(actorData);
+    }
+    static async runActor(actor) {
+        const actorData = await APIService.fetchActor(actor.id)
+        ActorSection.renderActor(actorData);
+    }
+}
+
+class ActorPage {
+    static actorContainer = document.getElementById("actorsDataContainer");
+    static renderActorSection(actor){
+        ActorSetion.renderActor(actor);
+    }
+}
+
+class ActorSection {
+    static renderActor(actor) {
+        ActorsPage.actorContainer.innerHTML = `
+      <div class="row">
+        <div class="col-md-4">
+          <img id="actor-backdrop" src=${actor.backdropUrlActors}> 
+        </div>
+        <div class="col-md-8">
+          <h2 id="actor-name">${actor.name}</h2>
+          <p id="actor-gender">${actor.gender}</p>
+           <p id="actor-birthday">${actor.birthday}</p>
+          <p id="actor-popularity">${actor.popularity}</p>
+          <h3>Biography:</h3>
+          <p id="actor-biography">${actor.biography}</p>
+        </div>
+      </div>
+    `;
+    }
+}
+
+
+
+class Actor {
+    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
+    constructor(json) {
+        //console.log(json);
+        this.name = json.name;
+        this.profile_path = json.profile_path;
+        this.birthday = json.birthday;
+        this.gender = json.gender;
+        this.popularity = json.popularity;
+        this.biography = json.biography;
+        this.id = json.id;
+    }
+    get backdropUrlActors() {
+        return this.profile_path ? Actor.BACKDROP_BASE_URL + this.profile_path : "";
+    }
+}
+
+
+
+
+
 class GenresMovies {
     static renderGeners(genres) {
         const genresNames = document.getElementById('dropdown-genres')
@@ -249,51 +306,16 @@ class ActorsInMovie {
     }
 }
 
-class Actor {
-    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
-    constructor(json) {
-        //console.log(json);
-        this.name = json.name;
-        this.profile_path = json.profile_path;
-        this.birthday = json.birthday;
-        this.gender = json.gender;
-        this.popularity = json.popularity;
-        this.biography = json.biography;
-        this.id = json.id;
-    }
-    get backdropUrlActors() {
-        return this.profile_path ? Actor.BACKDROP_BASE_URL + this.profile_path : "";
-    }
+
+
+
+
+function showActors() {
+    const actorsListBtn = document.getElementById("actorsListBtn");
+    actorsListBtn.addEventListener("click", function () {
+            MoviePage.container.innerHTML = ""
+            //ActorsPage.actorContainer.innerHTML = ""
+            Actors.run()
+    })
 }
-
-const actorsListBtn = document.getElementById("actorsListBtn");
-actorsListBtn.addEventListener("click", function () {
-    if (true) {
-        ActorsPage.actorContainer.innerHTML = "";
-        Actors.run()
-    }
-})
-class Movie {
-    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
-    constructor(json) {
-        //console.log(json);
-        this.id = json.id;
-        this.title = json.title;
-        this.releaseDate = json.release_date;
-        this.runtime = json.runtime + " minutes";
-        this.overview = json.overview;
-        this.backdropPath = json.backdrop_path;
-        this.original_language = json.original_language;
-        this.genre_ids = json.genre_ids;
-        this.production_companies = json.production_companies;
-        this.genres = json.genres;
-    }
-
-    get backdropUrl() {
-        return this.backdropPath ? Movie.BACKDROP_BASE_URL + this.backdropPath : "";
-    }
-
-
-}
-
 document.addEventListener("DOMContentLoaded", App.run);
