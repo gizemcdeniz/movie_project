@@ -4,9 +4,11 @@ class App {
     static async run() {
         const movies = await APIService.fetchMovies()
         const genreList = await APIService.fetchDropdowngenres()
+        const actors = await APIService.fetchActors()
         //console.log(genreList);
         HomePage.renderMovies(movies);
         GenresMovies.renderGeners(genreList);
+        //ActorsPage.renderActors(actors);
     }
 }
 
@@ -29,13 +31,13 @@ class APIService {
     static _constructUrl(path) {
         return `${this.TMDB_BASE_URL}/${path}?api_key=${atob('NTQyMDAzOTE4NzY5ZGY1MDA4M2ExM2M0MTViYmM2MDI=')}`;
     }
-    
-    static async fetchActors(movie_id) {
+
+    static async fetchActorsInEachMovie(movie_id) {
         const url = APIService._constructUrl(`movie/${movie_id}/credits`)
         const response = await fetch(url)
         const data = await response.json()
-        console.log(data);
-        return data.cast.slice(0,5).map(actor => new Actor(actor))
+        //console.log(data);
+        return data.cast.slice(0, 5).map(actor => new ActorsInMovie(actor))
     }
     static async fetchDirector(movie_id) {
         const url = APIService._constructUrl(`movie/${movie_id}/credits`)
@@ -43,41 +45,81 @@ class APIService {
         const data = await response.json()
         //console.log(data);
         //.map(({ foo }) => foo)
-        return data.crew.map(({job}) => job)
+        return data.crew.map(({ job }) => job)
         //filter((job) => job.dierctor !== job.dierctor)
-        
+
     }
-    static async fetchSimilarMovies(movie_id){
+    static async fetchSimilarMovies(movie_id) {
         const url = APIService._constructUrl(`movie/${movie_id}/similar`)
         const response = await fetch(url)
         const data = await response.json()
         //console.log(data);
-        return data.results.slice(0,5).map(similarMovie => new Movie(similarMovie))
+        return data.results.slice(0, 5).map(similarMovie => new Movie(similarMovie))
     }
-    static async fetchDropdowngenres(){
+    static async fetchDropdowngenres() {
         const url = APIService._constructUrl(`genre/movie/list`)
         const response = await fetch(url);
         const data = await response.json();
         //console.log(data);
         return data.genres
     }
-
-
+    static async fetchActors() {
+        const url = APIService._constructUrl(`person/popular`);
+        const response = await fetch(url);
+        const data = await response.json();
+        //console.log(data)
+        return data.results.map(actor => new Actor(actor));
+    }
+    static async fetchActor(person_id) {
+        const url = APIService._constructUrl(`person/${person_id}`);
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data)
+        return new Actor(data)
+    }
 }
+// static renderGeners(genres){
+//     const genresNames = document.getElementById('dropdown-genres')
+//     genresNames.innerHTML = genres.map(genre => {
+//       return  `<a class="dropdown-item" href="#">${genre.name}</a>`
+//     }).join("");
+// }
+class ActorsPage {
+    static actorContainer = document.getElementById("actorsDataContainer")
+    static renderActors(actors) {
+        console.log(actors);
+        actors.forEach(actor => {
+            const actorDiv = document.createElement("div");
+            const actorImage = document.createElement("img");
+            actorImage.src = `${actor.profile_path}`;
+            const actorName = document.createElement("h3");
+            actorName.textContent = `${actor.name}`;
+            actorImage.addEventListener("click", function () {
+                Actors.runActor(actor);
+            })
+            actorDiv.appendChild(actorName);
+            actorDiv.appendChild(actorImage);
+            this.actorContainer.appendChild(actorDiv);
+        })
+    }
+}
+
+
 class HomePage {
     static container = document.getElementById('container');
     static renderMovies(movies) {
+        //console.log(movies);
         movies.forEach(movie => {
             const movieDiv = document.createElement("div");
             const movieImage = document.createElement("img");
             movieImage.src = `${movie.backdropUrl}`;
             const movieTitle = document.createElement("h3");
             movieTitle.textContent = `${movie.title}`;
-            movieImage.addEventListener("click", function() {
+            movieImage.addEventListener("click", function () {
                 Movies.run(movie);
             });
 
-            
+
             movieDiv.appendChild(movieTitle);
             movieDiv.appendChild(movieImage);
             this.container.appendChild(movieDiv);
@@ -85,36 +127,64 @@ class HomePage {
     }
 }
 
-// class ActorSection {
-//     static renderActor(actors){
-//         MoviePage.container.innerHTML = ``  
-//     }
-// }
+class Actors {
+    static async run(actor) {
+        const actorData = await APIService.fetchActors();
+        //console.log(actorData);
+        ActorsPage.renderActorSection(actorData);
+    }
+    static async runActor(actor) {
+        const actorData = await APIService.fetchActor(actor.id)
+        ActorSection.renderActor(actorData);
+    }
+}
 
 class Movies {
     static async run(movie) {
         const movieData = await APIService.fetchMovie(movie.id);
         //console.log(movieData)
-        const actors = await APIService.fetchActors(movie.id)
+        const actorsInEachMovie = await APIService.fetchActorsInEachMovie(movie.id)
         //console.log(actors);
         const similar = await APIService.fetchSimilarMovies(movie.id)
         //console.log(similar);
         const directorName = await APIService.fetchDirector(movie.id)
-        console.log(directorName);
-        // const genresMovies = await APIService.fetchDropdowngenres(movie)
-        // console.log(genresMovies);
-        
-        MoviePage.renderMovieSection(movieData,actors, similar, directorName);
+        //console.log(directorName);
+
+        MoviePage.renderMovieSection(movieData, actorsInEachMovie, similar, directorName);
     }
 }
-
+// class ActorPage {
+//     static actorContainer = document.getElementById("actorsData-container");
+//     static renderActorSection(actor){
+//         ActorSetion.renderActor(actor);
+//     }
+//}
 class MoviePage {
     static container = document.getElementById('container');
     static renderMovieSection(movie, actors, similar, directorName) {
-        MovieSection.renderMovie(movie,actors, similar, directorName);
+        MovieSection.renderMovie(movie, actors, similar, directorName);
     }
 }
-
+class ActorSection {
+    static renderActor(actor) {
+        ActorsPage.actorContainer.innerHTML = `
+      <div class="row">
+        <div class="col-md-4">
+          <img id="actor-backdrop" src=${actor.backdropUrlActors}> 
+        </div>
+        <div class="col-md-8">
+          <h2 id="actor-name">${actor.name}</h2>
+          <p id="actor-gender">${actor.gender}</p>
+           <p id="actor-birthday">${actor.birthday}</p>
+          
+          <p id="actor-popularity">${actor.popularity}</p>
+          <h3>Biography:</h3>
+          <p id="actor-biography">${actor.biography}</p>
+        </div>
+      </div>
+    `;
+    }
+}
 class MovieSection {
     static renderMovie(movie, actors, similar, directorName) {
         MoviePage.container.innerHTML = `
@@ -147,43 +217,62 @@ class MovieSection {
         ${actors.map(actor => `
         <img src=${actor.backdropUrl} width = 20% >
         <p> ${actor.name}</p>
-        `   
+        `
         )}
     
         </div>
     `;
-    //console.log(movie);
+        //console.log(movie);
     }
 }
 
 class GenresMovies {
-  static renderGeners(genres){
-      const genresNames = document.getElementById('dropdown-genres')
-      genresNames.innerHTML = genres.map(genre => {
-        return  `<a class="dropdown-item" href="#">${genre.name}</a>`
-      }).join("");
-  }
+    static renderGeners(genres) {
+        const genresNames = document.getElementById('dropdown-genres')
+        genresNames.innerHTML = genres.map(genre => {
+            return `<a class="dropdown-item" href="#">${genre.name}</a>`
+        }).join("");
+    }
 }
 
 
-class Actor {
-    //static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
+class ActorsInMovie {
     constructor(json) {
         //console.log(json); 
         this.name = json.name;
-        this.gender=json.gender
+        this.gender = json.gender
         this.profile_path = json.profile_path;
         this.job = json.job
-        // this.title = json.title;
-        // this.releaseDate = json.release_date;
-        // this.runtime = json.runtime + " minutes";
-        // this.overview = json.overview;
-        // this.backdropPath = json.backdrop_path;
     }
     get backdropUrl() {
         return this.profile_path ? Movie.BACKDROP_BASE_URL + this.profile_path : "";
     }
 }
+
+class Actor {
+    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
+    constructor(json) {
+        //console.log(json);
+        this.name = json.name;
+        this.profile_path = json.profile_path;
+        this.birthday = json.birthday;
+        this.gender = json.gender;
+        this.popularity = json.popularity;
+        this.biography = json.biography;
+        this.id = json.id;
+    }
+    get backdropUrlActors() {
+        return this.profile_path ? Actor.BACKDROP_BASE_URL + this.profile_path : "";
+    }
+}
+
+const actorsListBtn = document.getElementById("actorsListBtn");
+actorsListBtn.addEventListener("click", function () {
+    if (true) {
+        ActorsPage.actorContainer.innerHTML = "";
+        Actors.run()
+    }
+})
 class Movie {
     static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
     constructor(json) {
@@ -197,10 +286,7 @@ class Movie {
         this.original_language = json.original_language;
         this.genre_ids = json.genre_ids;
         this.production_companies = json.production_companies;
-        //console.log(production_companies);
-        //console.log(this.genre_ids);
         this.genres = json.genres;
-        //this.original_language = original_language;
     }
 
     get backdropUrl() {
@@ -209,5 +295,5 @@ class Movie {
 
 
 }
-//comment test 
+
 document.addEventListener("DOMContentLoaded", App.run);
