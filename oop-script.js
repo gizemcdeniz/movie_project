@@ -63,6 +63,13 @@ class APIService {
         //console.log(data);
         return data.genres
     }
+    static async fetchGenresList() {
+        const url = APIService._constructUrl(`discover/movie`)
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data);
+        return data.results
+    }
     static async fetchActors() {
         const url = APIService._constructUrl(`person/popular`);
         const response = await fetch(url);
@@ -279,7 +286,6 @@ class Video {
     constructor(json) {
         this.key = json;
     }
-
     static async getVideoUrl(movie_id) {
         const dataVideo = await APIService.fetchVideos(movie_id);
         console.log(dataVideo);
@@ -317,6 +323,13 @@ class GenresMovies {
     }
 }
 
+class GenresList {
+    static async renderList(results) {
+        console.log(results)
+        //const genresItems = document.getElementById('dropdown-genres')
+
+    }
+}
 
 class ActorsInMovie {
     constructor(json) {
@@ -336,11 +349,11 @@ class ActorsInMovie {
 
 
 function showActors() {
-    const actorsListBtn = document.getElementById("actorsListBtn");
-    actorsListBtn.addEventListener("click", function () {
+    //const actorsListBtn = document.getElementById("actorsListBtn");
+    //actorsListBtn.addEventListener("click", function () {
             MoviePage.container.innerHTML = ""
             //ActorsPage.actorContainer.innerHTML = ""
             Actors.run()
-    })
+    // })
 }
 document.addEventListener("DOMContentLoaded", App.run);
