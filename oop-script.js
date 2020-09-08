@@ -12,6 +12,15 @@ class App {
     }
 }
 
+class GenresMooviesList {
+    static async run(genreId) {
+        HomePage.container.innerHTML = "";
+        const discoverData = await APIService.fetchGenresList(genreId);
+        HomePage.renderMovies(discoverData);
+        //ActorsPage.renderActors(actors);
+    }
+}
+
 class APIService {
     static TMDB_BASE_URL = 'https://api.themoviedb.org/3';
     static async fetchMovies() {
@@ -43,10 +52,10 @@ class APIService {
         const url = APIService._constructUrl(`movie/${movie_id}/credits`)
         const response = await fetch(url)
         const data = await response.json()
-        //console.log(data);
-        //.map(({ foo }) => foo)
-        return data.crew.map(({ job }) => job)
-        //filter((job) => job.dierctor !== job.dierctor)
+        const directorData = data.crew.find(x => x.department === "Directing")
+        console.log(directorData);
+        return new Actor(directorData)
+
 
     }
     static async fetchSimilarMovies(movie_id) {
@@ -63,12 +72,13 @@ class APIService {
         //console.log(data);
         return data.genres
     }
-    static async fetchGenresList() {
-        const url = APIService._constructUrl(`discover/movie`)
+    static async fetchGenresList(genreId) {
+        const url = APIService._constructUrl(`discover/movie`) + `&with_genres=${genreId}`
+        console.log(url);
         const response = await fetch(url);
         const data = await response.json();
         console.log(data);
-        return data.results
+        return data.results.map(movie => new Movie(movie))
     }
     static async fetchActors() {
         const url = APIService._constructUrl(`person/popular`);
@@ -317,19 +327,35 @@ class Actor {
 class GenresMovies {
     static renderGeners(genres) {
         const genresNames = document.getElementById('dropdown-genres')
-        genresNames.innerHTML = genres.map(genre => {
-            return `<a class="dropdown-item" href="#">${genre.name}</a>`
-        }).join("");
+        // genresNames.innerHTML = genres.map(genre => {
+        //     return `<a class="dropdown-item" href="#">${genre.name}</a>`
+        // }).join("");
+        genres.forEach(genre => {
+            const genreiteme = document.createElement("a");
+            genreiteme.textContent = `${genre.name}`;
+            genreiteme.className = "dropdown-item";
+            genreiteme.addEventListener("click", function () {
+                GenresMooviesList.run(genre.id);
+            });
+
+            genresNames.appendChild(genreiteme);
+        })
     }
 }
 
-class GenresList {
-    static async renderList(results) {
-        console.log(results)
+//add eevent listner, then call a methoud or function passing the genera as argument 
+
+// class GenresList {
+//     static async renderList() {
+//         const genereAll = document.getElementById("navbarDropdown")
+//         genereAll.addEventListener("click", funcrion(){
+
+//         })
+        //console.log(results)
         //const genresItems = document.getElementById('dropdown-genres')
 
-    }
-}
+//     }
+// }
 
 class ActorsInMovie {
     constructor(json) {
