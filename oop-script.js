@@ -4,11 +4,15 @@ class App {
     static async run() {
         const movies = await APIService.fetchMovies()
         const genreList = await APIService.fetchDropdowngenres()
+        //const results = await APIService.fetchSearch()
         //const actors = await APIService.fetchActors()
         //console.log(genreList);
         HomePage.renderMovies(movies);
         GenresMovies.renderGeners(genreList);
+        //Search.renderSearch(results);
+        //console.log(results)
         //ActorsPage.renderActors(actors);
+        
     }
 }
 
@@ -99,8 +103,16 @@ class APIService {
         const url = APIService._constructUrl(`movie/${movie_id}/videos`);
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data.results[0].key)
+        //console.log(data.results[0].key)
         return new Video(data.results[0].key)
+    }
+
+    static async fetchSearch(userInputs){
+        const url = APIService._constructUrl(`search/multi` + `&query=${userInputs}`)
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data)
+        return data.results.map(movie => new Movie(movie))
     }
 }
 // static renderGeners(genres){
@@ -146,6 +158,8 @@ class Movies {
         //console.log(directorName);
         const videos = await APIService.fetchVideos(movie.id);
 
+        // const search = await APIService.fetchSearch();
+        // console .log(search)
         MoviePage.renderMovieSection(movieData, actorsInEachMovie, similar, directorName, videos);
     }
 }
@@ -370,6 +384,35 @@ class ActorsInMovie {
     }
 }
 
+class SearchList {
+    static async run(userInput){
+        HomePage.container.innerHTML = "";
+        const results = await APIService.fetchSearch(userInput)
+        HomePage.renderMovies(results)
+    }
+}
+
+class Search {
+    static inputs = document.getElementById("inputs").value;
+    static renderSearch(userInputs) {
+        //const searchBtn = document.getElementById("searchBtn")
+        userInputs.forEach(userInput => {
+            const searchDiv = document.createElement("div");
+            const searchImg = document.createElement("img");
+            searchImg.src = `${userInput.poster_path}`;
+            const searchMovieName = document.createElement("h3");
+            searchMovieName.textContent = `${userInput.original_title}`;
+            searchImg.addEventListener("click", function () {
+                SearchList.run(userInput);
+            })
+            searchDiv.appendChild(searchDiv);
+            searchDiv.appendChild(searchImg);
+            //mainDiv.appendChild(actorDiv);
+            //Search.inputs.appendChild(searchDiv);
+        })
+    }
+}
+
 
 
 
@@ -382,4 +425,40 @@ function showActors() {
             Actors.run()
     // })
 }
+
+function aboutUspage(){
+const aboutUs = document.getElementById("aboutUs")
+aboutUs.addEventListener("click",function () {
+    MoviePage.container.innerHTML = `
+    <div class="container">
+    <div class="container text-center">
+    <h3>THE Movie website</h3>
+    <p><em>We love Movies!</em></p>
+    <p>We have created a website for movie lovers</p>
+    <br>
+    <div class="row">
+      <div class="col-sm-4">
+        <p><strong>Ray </strong></p><br>
+        <img src="https://avatars2.githubusercontent.com/u/67803538?s=400&u=ef3016cba9652cf0bcb93d2dd1179f2c84f3c353&v=4" >
+      </div>
+      <div class="col-sm-4">
+        <p><strong>Gizem</strong></p><br>
+        <img src="https://avatars1.githubusercontent.com/u/61707093?s=400&u=751237478cea06295482070fcf07fdb404503b48&v=4">
+      </div>
+      <div class="col-sm-4">
+        <p><strong>Mohammed</strong></p><br>
+        <img src="https://avatars0.githubusercontent.com/u/62549249?s=400&u=e4a7b030f996bf3859e6638c302dc11362202a3d&v=4" >
+      </div>
+    </div>
+  </div>
+  </div>
+    
+    `
+
+    aboutUsPage.aboutUsContainer.innerHTML = ""
+})
+
+}
+
+
 document.addEventListener("DOMContentLoaded", App.run);
