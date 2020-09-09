@@ -4,11 +4,15 @@ class App {
     static async run() {
         const movies = await APIService.fetchMovies()
         const genreList = await APIService.fetchDropdowngenres()
+        //const results = await APIService.fetchSearch()
         //const actors = await APIService.fetchActors()
         //console.log(genreList);
         HomePage.renderMovies(movies);
         GenresMovies.renderGeners(genreList);
+        //Search.renderSearch(results);
+        //console.log(results)
         //ActorsPage.renderActors(actors);
+        
     }
 }
 
@@ -18,6 +22,26 @@ class GenresMooviesList {
         const discoverData = await APIService.fetchGenresList(genreId);
         HomePage.renderMovies(discoverData);
         //ActorsPage.renderActors(actors);
+    }
+}
+
+class SearchList {
+    static async run(userInput){
+        HomePage.container.innerHTML = "";
+        const searchMovies = await APIService.fetchSearchMovie(userInput)
+        HomePage.renderMovies(searchMovies)
+        const searchActors = await APIService.fetchSearchActor(userInput);
+        ActorsPage.renderActors(searchActors)
+    }
+}
+
+class FilterList{
+    static async run(){
+        HomePage.container.innerHTML = "";
+        const popularMovies = await APIService.fetchFilterMovies();
+        HomePage.renderMovies(popularMovies);
+        const releaseDateMovies = await APIService.fetchFilterReleaseDate(movieId);
+        HomePage.renderMovies(releaseDateMovies);
     }
 }
 
@@ -53,7 +77,7 @@ class APIService {
         const response = await fetch(url)
         const data = await response.json()
         const directorData = data.crew.find(x => x.department === "Directing")
-        console.log(directorData);
+        //console.log(directorData);
         return new Actor(directorData)
 
 
@@ -99,8 +123,40 @@ class APIService {
         const url = APIService._constructUrl(`movie/${movie_id}/videos`);
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data.results[0].key)
+        //console.log(data.results[0].key)
         return new Video(data.results[0].key)
+    }
+
+    static async fetchSearchMovie(userInputs){
+        const url = APIService._constructUrl(`search/movie`) + `&query=${userInputs}`
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data)
+        return data.results.map(movie => new Movie(movie))
+    }
+
+    static async fetchSearchActor(userInputs){
+        const url = APIService._constructUrl(`search/person`) + `&query=${userInputs}`
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data)
+        return data.results.map(actor => new Actor(actor))
+    }
+
+    static async fetchFilterMovies(){
+        const url = APIService._constructUrl(`movie/popular`) 
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data)
+        return data.results.map(movie => new Movie(movie))
+    }
+    
+    static async fetchFilterReleaseDate(movie_id){
+    const url = APIService._constructUrl(`movie/${movie_id}/release_dates`) 
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log(data)
+    return data.results.map(movie => new Movie(movie))
     }
 }
 // static renderGeners(genres){
@@ -146,6 +202,8 @@ class Movies {
         //console.log(directorName);
         const videos = await APIService.fetchVideos(movie.id);
 
+        // const search = await APIService.fetchSearch();
+        // console .log(search)
         MoviePage.renderMovieSection(movieData, actorsInEachMovie, similar, directorName, videos);
     }
 }
@@ -371,9 +429,51 @@ class ActorsInMovie {
 }
 
 
+// class Search {
+//     static inputs = document.getElementById("inputs").value;
+//     static renderSearch(userInputs) {
+//         //const searchBtn = document.getElementById("searchBtn")
+//         userInputs.forEach(userInput => {
+//             const searchDiv = document.createElement("div");
+//             const searchImg = document.createElement("img");
+//             searchImg.src = `${userInput.poster_path}`;
+//             const searchMovieName = document.createElement("h3");
+//             searchMovieName.textContent = `${userInput.original_title}`;
+//             searchImg.addEventListener("click", function () {
+//                 SearchList.run(userInput);
+//             })
+//             searchDiv.appendChild(searchDiv);
+//             searchDiv.appendChild(searchImg);
+//             //mainDiv.appendChild(actorDiv);
+//             //Search.inputs.appendChild(searchDiv);
+//         })
+//     }
+// }
 
 
+// search 
+ const inputs = document.getElementById("inputs");
+ const searchForm = document.getElementById("searchForm");
+    searchForm.addEventListener("submit", function (e) {
+        e.preventDefault()
+    SearchList.run(inputs.value);
+})
 
+//filter
+//const filterPop = document.getElementById("dropdownMenuLink");
+const dropdownPopular = document.getElementById("dropdownPopularLink");
+    dropdownPopular.addEventListener("click", function (e){
+        e.preventDefault()
+        FilterList.run()
+    })
+
+const dropdownReleaseDate = document.getElementById("dropdownReleaseLink");
+    dropdownReleaseDate.addEventListener("click", function (e){
+        e.preventDefault()
+        FilterList.run();
+    })
+
+//showing genere list
 function showActors() {
     //const actorsListBtn = document.getElementById("actorsListBtn");
     //actorsListBtn.addEventListener("click", function () {
@@ -382,4 +482,38 @@ function showActors() {
             Actors.run()
     // })
 }
+function aboutUspage(){
+    // const aboutUs = document.getElementById("aboutUs")
+    // aboutUs.addEventListener("click",function () {
+        MoviePage.container.innerHTML = `
+        <div class="container">
+        <div class="container text-center">
+        <h3>Movies & Chill</h3>
+        <p><em>We love Movies!</em></p>
+        <p>We have created a website for movie lovers</p>
+        <br>
+        <div class="row">
+          <div class="col-sm-4">
+            <p><strong>Ray </strong></p><br>
+            <img src="https://avatars2.githubusercontent.com/u/67803538?s=400&u=ef3016cba9652cf0bcb93d2dd1179f2c84f3c353&v=4" >
+          </div>
+          <div class="col-sm-4">
+            <p><strong>Gizem</strong></p><br>
+            <img src="https://avatars1.githubusercontent.com/u/61707093?s=400&u=751237478cea06295482070fcf07fdb404503b48&v=4">
+          </div>
+          <div class="col-sm-4">
+            <p><strong>Mohammed</strong></p><br>
+            <img src="https://avatars0.githubusercontent.com/u/62549249?s=400&u=e4a7b030f996bf3859e6638c302dc11362202a3d&v=4" >
+          </div>
+        </div>
+      </div>
+      </div>
+        
+        `
+    
+        //aboutUspage.aboutUsContainer.innerHTML = ""
+    // })
+    
+    }
+    
 document.addEventListener("DOMContentLoaded", App.run);
