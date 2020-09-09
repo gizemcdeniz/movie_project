@@ -9,3 +9,41 @@
 #actors {
     margin: 24px 16px 0 0;
 }
+.footer{
+    background-color:black;
+}
+.logo-small {
+    color: #f4511e;
+    font-size: 50px;
+  }
+  
+  .logo {
+    color: #f4511e;
+    font-size: 200px;
+  }
+
+  #movie-backdrop {
+    width: 100%;
+}
+
+.container {
+    padding-top: 32px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#actorsDataContainer{
+   padding-top: 32px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    background-color:beige;
+}
+
+img {
+    width: 300px;
+    height: 250px;
+}
