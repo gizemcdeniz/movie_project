@@ -73,7 +73,7 @@ class APIService {
         const url = APIService._constructUrl(`movie/${movie_id}/credits`)
         const response = await fetch(url)
         const data = await response.json()
-        //console.log(data);
+        // console.log(data);
         return data.cast.slice(0, 5).map(actor => new ActorsInMovie(actor))
     }
     static async fetchDirector(movie_id) {
@@ -203,7 +203,7 @@ class Movies {
         const movieData = await APIService.fetchMovie(movie.id);
         //console.log(movieData)
         const actorsInEachMovie = await APIService.fetchActorsInEachMovie(movie.id)
-        //console.log(actors);
+        console.log(actors);
         const similar = await APIService.fetchSimilarMovies(movie.id)
         //console.log(similar);
         const directorName = await APIService.fetchDirector(movie.id)
@@ -231,11 +231,11 @@ class ActorSection {
           <img id="actor-backdrop" src=${actor.backdropUrlActors}> 
         </div>
         <div class="col-md-8">
-          <h2 id="actor-name">${actor.name}</h2>
+          <h2 id="actor-name"> Actor Name: ${actor.name}</h2>
           <p id="actor-gender">${actor.gender}</p>
-           <p id="actor-birthday">${actor.birthday}</p>
+           <p id="actor-birthday">${actor.name}'s Birthday's: ${actor.birthday}</p>
           
-          <p id="actor-popularity">${actor.popularity}</p>
+          <p id="actor-popularity">Actor Popularity: ${actor.popularity}</p>
           <h3>Biography:</h3>
           <p id="actor-biography">${actor.biography}</p>
         </div>
