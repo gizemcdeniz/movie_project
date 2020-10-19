@@ -12,7 +12,7 @@
 <body>
     <div class="navBar">
         <!-- <button type="button" class="btn btn-secondary"><a href="/">home</a></button> -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg">
             <a class="navbar-brand" href="/">Movies & Chill</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
@@ -30,10 +30,10 @@
                   <a class="nav-link" href="#" id="actorsListBtn" onclick="showActors()">Actor list<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#" id="aboutUs" onclick="aboutUspage()">about</a>
+                  <a class="nav-link" href="#" id="aboutUs" onclick="aboutUspage()">About</a>
                 </li>
                 <div class="dropdown" id="dropdown">
-                  <a class="btn dropdown-toggle" href="#" role="button"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <a class="nav-link dropdown-toggle" href="#" role="button"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Filter
                   </a>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -45,15 +45,15 @@
               </ul>
               <form class="form-inline my-2 my-lg-0" id="searchForm">
                 <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="inputs">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="searchBtn">Search</button>
+                <button class="btn btn-outline-light my-2 my-sm-0" type="submit" id="searchBtn">Search</button>
               </form>
             </div>
           </nav>
     </div>
-    <div id="container" class="container"></div>
+    <div id="container" >
+    </div>
     <div id="actorsDataContainer"></div>
     <footer class="page-footer font-small blue pt-4  footer ">
-      <div class="container-fluid ">
         <div class="row">
           <div class="col-md-12 mt-md-0 mt-3">
             <!-- Content -->
@@ -65,6 +65,7 @@
                   <a class="text-white m-3" href="https://github.com/raycodes-2020" target="_blank" >  <i class="fab fa-github-alt"></i> Ray  </a>
                   <a  class="text-white m-3" href="https://github.com/gizemcdeniz" target="_blank">  <i class="fab fa-github-alt"></i> Gizem </a>
                 </div>
+              
     </footer>
     
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>

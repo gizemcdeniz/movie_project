@@ -39,10 +39,14 @@ class FilterList{
     static async run(){
         HomePage.container.innerHTML = "";
         const popularMovies = await APIService.fetchFilterMovies();
+        console.log(popularMovies)
         HomePage.renderMovies(popularMovies);
-        const releaseDateMovies = await APIService.fetchFilterReleaseDate(movieId);
-        HomePage.renderMovies(releaseDateMovies);
+        const voteCount = await APIService.fetchVoteCount();
+        HomePage.renderVote(voteCount);
+        console.log(voteCount)
+        
     }
+    
 }
 
 class APIService {
@@ -86,7 +90,7 @@ class APIService {
         const url = APIService._constructUrl(`movie/${movie_id}/similar`)
         const response = await fetch(url)
         const data = await response.json()
-        //console.log(data);
+        console.log(data);
         return data.results.slice(0, 5).map(similarMovie => new Movie(similarMovie))
     }
     static async fetchDropdowngenres() {
@@ -151,13 +155,17 @@ class APIService {
         return data.results.map(movie => new Movie(movie))
     }
     
-    static async fetchFilterReleaseDate(movie_id){
-    const url = APIService._constructUrl(`movie/${movie_id}/release_dates`) 
+    static async fetchVoteCount(){
+    const url = APIService._constructUrl(`movie/popular`) 
     const response = await fetch(url);
     const data = await response.json();
     console.log(data)
-    return data.results.map(movie => new Movie(movie))
+    // return data.results.map(date => new Movie(date))
+    // return data.results.map(vote => new Movie(vote))
+    return data.results.map(vote => new Movie(vote))
     }
+
+
 }
 // static renderGeners(genres){
 //     const genresNames = document.getElementById('dropdown-genres')
@@ -201,7 +209,6 @@ class Movies {
         const directorName = await APIService.fetchDirector(movie.id)
         //console.log(directorName);
         const videos = await APIService.fetchVideos(movie.id);
-
         // const search = await APIService.fetchSearch();
         // console .log(search)
         MoviePage.renderMovieSection(movieData, actorsInEachMovie, similar, directorName, videos);
@@ -213,7 +220,7 @@ class MoviePage {
     static container = document.getElementById('container');
 
 static renderMovieSection(movie, actorsInMovie, similar, directorName, videos) {
-    MovieSection.renderMovie(movie, actorsInMovie, similar, directorName, videos);
+    MovieSection.renderMovie(movie, actorsInMovie, similar, directorName, videos );
     }
 }
 class ActorSection {
@@ -247,11 +254,11 @@ class MovieSection {
           <img id="movie-backdrop" src=${movie.backdropUrl}> 
         </div>
         <div class="col-md-8">
-          <h2 id="movie-title">${movie.title}</h2>
-          <p id="genres">${movie.genres.map(genre => genre.name)}</p>
-          <p id="language">${movie.original_language}</p>
-          <p id="movie-release-date">${movie.releaseDate}</p>
-          <p id="movie-runtime">${movie.runtime}</p>
+          <h2 id="movie-title">Film Name: ${movie.title}</h2>
+          <p id="genres"> Film Type:  ${movie.genres.map(genre => genre.name)}</p>
+          <p id="language">Film Language: ${movie.original_language}</p>
+          <p id="movie-release-date">Release Date: ${movie.releaseDate}</p>
+          <p id="movie-runtime">Film Duration: ${movie.runtime}</p>
           <h3>Overview:</h3>
           <p id="movie-overview">${movie.overview}</p>
           <h4>Dirctor Name</h4>
@@ -259,23 +266,27 @@ class MovieSection {
           <h5>Production Companies</h5>
           <p id="prductionNames">${movie.production_companies.map(production_company => production_company.name)}</P>
         </div>
+      </div>
+      <div class="d-flex flex-column bd-highlight mb-3">
+      <h4>Videos</h4>
+      <iframe width="560" height="315" src="https://youtube.com/embed/${videos.key}" allowfullscreen></iframe>
+      <h3>Actors:</h3>
+      <div class="d-flex flex-row bd-highlight mb-3">
+        ${actors.map(actor => `
+        <img class="img-thumbnail" id="imageActor" src=${actor.backdropUrl} width = 5% >
+
+        <p>  ${actor.name}</p>
+        `
+        )}
+    
+        </div>
         <div>
+        <h3>Similar Movies</h3>
         ${similar.map(simiMovie => `
         <p>${simiMovie.title}</p>
         `
         ).join("")}
         </div>
-      </div>
-      <h3>Actors:</h3>
-      <h4>Videos</h4>
-      <iframe width="560" height="315" src="https://youtube.com/embed/${videos.key}" allowfullscreen></iframe>
-        <div>
-        ${actors.map(actor => `
-        <img src=${actor.backdropUrl} width = 20% >
-        <p> ${actor.name}</p>
-        `
-        )}
-    
         </div>
     `;
         //console.log(movie);
@@ -297,6 +308,7 @@ class Movie {
         this.genre_ids = json.genre_ids;
         this.production_companies = json.production_companies;
         this.genres = json.genres;
+        this.vote_count = json.vote_count;
     }
 
     get backdropUrl() {
@@ -463,13 +475,13 @@ class ActorsInMovie {
 //const filterPop = document.getElementById("dropdownMenuLink");
 const dropdownPopular = document.getElementById("dropdownPopularLink");
     dropdownPopular.addEventListener("click", function (e){
-        e.preventDefault()
+        // e.preventDefault()
         FilterList.run()
     })
 
 const dropdownReleaseDate = document.getElementById("dropdownReleaseLink");
-    dropdownReleaseDate.addEventListener("click", function (e){
-        e.preventDefault()
+    dropdownReleaseDate.addEventListener("click", function (){
+        // e.preventDefault()
         FilterList.run();
     })
 
